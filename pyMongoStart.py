@@ -40,10 +40,11 @@ def insertRecord(accessToken, sensorData):
     print 'hi'
     if res != None:
         dataRow = {}
-        dataRow['sensor'] = res['s'][sensorData['sensorId']]
-        dataRow['device'] = res['d'][sensorData['deviceId']]
-        dataRow['loc'] = sensorData['loc']
-        dataRow['time'] = sensorData['timeStamp'] 
+        dataRow['s'] = res['s'][sensorData['sensorId']]
+        dataRow['d'] = res['d'][sensorData['deviceId']]
+        dataRow['l'] = sensorData['loc']
+        dataRow['aK'] = accessToken
+        dataRow['t'] = sensorData['timeStamp'] 
         db.data.insert(dataRow)
         db.stream.insert(dataRow)
     else:

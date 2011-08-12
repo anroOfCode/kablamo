@@ -116,14 +116,15 @@ class DataFactory(Factory):
         pass
  
     @inlineCallbacks
-    def insertDataRow(self, mDb, accessKeyRow, deviceId, dataRow, sensorMatrix):
+    def insertDataRow(self, mDb, accessKeyRow, deviceId, dataRow, sensorMatrix, location):
         for i in range(0, len(sensorMatrix)):
             insertObject = {}
-            insertObject["accessKey"] = accessKeyRow._id
-            insertObject["deviceId"] = accessKeyRow.d[deviceId]
-            insertObject["sensorId"] = accessKeyRow.s[sensorMatrix[i]]
-            insertObject["timeStamp"] = dataRow.timeStamp
-            insertObject["value"] = dataRow.sensorValues[i]
+            insertObject["aK"] = accessKeyRow['_id']
+            insertObject["d"] = accessKeyRow['d'][deviceId]
+            insertObject["s"] = accessKeyRow['s'][sensorMatrix[i]]
+            insertObject["t"] = dataRow.timeStamp
+            insertObject["v"] = dataRow.sensorValues[i]
+            insertObject["l"] = location
             yield mDb.data.insert(insertObject)
             yield mDb.stream.insert(insertObject) 
 
@@ -131,11 +132,13 @@ class DataFactory(Factory):
     def processData(self, data):
         db = yield txmongo.MongoConnection()
         mDb = db.data 
-        accessToken =  yield mDb.accessTokens.find({"_id" : ObjectId(data.accessKey)})
+        accessToken =  yield mDb.accessKeys.find_one({"_id" : ObjectId(data.accessKey)})
         print 'Do we have a result?'
 	print str(accessToken)
-        if len(accessToken) == 1: # do we have results?
-            if accessToken.e == True:
+        if accessToken != None: # do we have results?
+            if accessToken['e'] == True:
+                for dR in data.data:
+                    self.insertDataRow(mDb, accessToken, data.deviceId, dR, data.sensors, [data.lat, data.log])
                 yield 2
             else:
                 yield 1
