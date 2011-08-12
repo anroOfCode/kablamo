@@ -1,0 +1,3 @@
+Kablamo!
+
+A high-performance python based sensor data collection library using MongoDB for a backend, making use of Twisted for network communications. 
